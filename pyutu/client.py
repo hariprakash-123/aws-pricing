@@ -1,6 +1,7 @@
 # Copyright (c) 2016 Brett Francis http://www.oort.org
 #
 
+import os
 import sys
 import logging
 import requests
@@ -14,16 +15,24 @@ logging.basicConfig(stream=sys.stdout,
                     datefmt="%Y-%m-%dT%H:%M:%S%z")
 logger = logging.getLogger(__name__)
 
-req = CacheControl(requests.Session(), cache=FileCache('pyutu.cache'))
+req = CacheControl(
+    requests.Session(),
+    cache=FileCache(os.path.join('/tmp', 'pyutu.cache'))
+)
 
 regions = {
     'ap-northeast-1': "Asia Pacific (Tokyo)",
+    'ap-northeast-2': "Asia Pacific (Seoul)",
     'ap-southeast-1': "Asia Pacific (Singapore)",
     'ap-southeast-2': "Asia Pacific (Sydney)",
+    'ap-south-1': "Asia Pacific (Mumbai)",
+    'ca-central-1': "Canada (Central)",
     'eu-central-1': "EU (Frankfurt)",
     'eu-west-1': "EU (Ireland)",
+    'eu-west-2': "EU (London)",
     'sa-east-1': "South America (Sao Paulo)",
     'us-east-1': "US East (N. Virginia)",
+    'us-east-2': "US East (Ohio)",
     'us-west-1': "US West (N. California)",
     'us-west-2': "US West (Oregon)"
 }
@@ -82,18 +91,19 @@ def camel_case(st):
 
 class PricingContext(object):
 
-    def __init__(self, region):
+    def __init__(self, region, idx_file=None):
         self.sku = None
         self.aws_root = "https://pricing.us-east-1.amazonaws.com"
         self.region = region
         self.aws_index = self.aws_root + "/offers/v1.0/aws/index.json"
-        self.idx = req.get(self.aws_index).json()
+        self.idx = req.get(self.aws_index).json() if not idx_file else idx_file
         self.sku = None
         self.service = ''
         self._service_alias = None
         self._service_url = None
         self._terms = None
         self.attributes = {}
+        self.offer_file = None  # Offer file location in local
 
     @property
     def terms(self):
@@ -150,7 +160,7 @@ def find_products(pc):
     logger.info("Region: {0}".format(pc.region))
     logger.info("Product Terms: {0}".format(pc.terms))
 
-    offer_file = req.get(pc.service_url).json()
+    offer_file = req.get(pc.service_url).json() if not pc.offer_file else pc.offer_file
 
     products = {}
     if pc.sku is None:
@@ -188,7 +198,7 @@ def find_products(pc):
 
 
 def get_sku(pc):
-    offer_file = req.get(pc.service_url).json()
+    offer_file = req.get(pc.service_url).json() if not pc.offer_file else pc.offer_file
 
     return {
         'regionId': pc.region,
