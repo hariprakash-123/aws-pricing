@@ -175,7 +175,7 @@ def find_products(pc):
                 # AND service
                 f2r = svcs[pc.service]['prod_families'][prod_fam]
                 attr_val = product['attributes'][f2r]
-                if attr_val == regions[pc.region]:
+                if attr_val == pc.region:
                     sku = product['sku']
                     logger.debug('Found product SKU: {0} in region: {1}'.format(
                         sku, pc.region
