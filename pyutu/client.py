@@ -20,22 +20,22 @@ req = CacheControl(
     cache=FileCache(os.path.join('/tmp', 'pyutu.cache'))
 )
 
-regions = {
-    'ap-northeast-1': "Asia Pacific (Tokyo)",
-    'ap-northeast-2': "Asia Pacific (Seoul)",
-    'ap-southeast-1': "Asia Pacific (Singapore)",
-    'ap-southeast-2': "Asia Pacific (Sydney)",
-    'ap-south-1': "Asia Pacific (Mumbai)",
-    'ca-central-1': "Canada (Central)",
-    'eu-central-1': "EU (Frankfurt)",
-    'eu-west-1': "EU (Ireland)",
-    'eu-west-2': "EU (London)",
-    'sa-east-1': "South America (Sao Paulo)",
-    'us-east-1': "US East (N. Virginia)",
-    'us-east-2': "US East (Ohio)",
-    'us-west-1': "US West (N. California)",
-    'us-west-2': "US West (Oregon)"
-}
+# regions = {
+#     'ap-northeast-1': "Asia Pacific (Tokyo)",
+#     'ap-northeast-2': "Asia Pacific (Seoul)",
+#     'ap-southeast-1': "Asia Pacific (Singapore)",
+#     'ap-southeast-2': "Asia Pacific (Sydney)",
+#     'ap-south-1': "Asia Pacific (Mumbai)",
+#     'ca-central-1': "Canada (Central)",
+#     'eu-central-1': "EU (Frankfurt)",
+#     'eu-west-1': "EU (Ireland)",
+#     'eu-west-2': "EU (London)",
+#     'sa-east-1': "South America (Sao Paulo)",
+#     'us-east-1': "US East (N. Virginia)",
+#     'us-east-2': "US East (Ohio)",
+#     'us-west-1': "US West (N. California)",
+#     'us-west-2': "US West (Oregon)"
+# }
 
 svcs = {
     "ec2": {
@@ -70,7 +70,15 @@ svcs = {
             "Storage": "location",
             "Fee": "location"
         }
-    }
+    },
+    "rds": {
+            'offer_code': "AmazonRDS",
+            'prod_families': {
+                "Data Transfer": "fromLocation",
+                "Database Instance": "location",
+                "Database Storage": "location"
+            }
+        }
 }
 #     "glacier": "AmazonGlacier",
 #     "cloudfront": "AmazonCloudFront",
@@ -175,7 +183,7 @@ def find_products(pc):
                 # AND service
                 f2r = svcs[pc.service]['prod_families'][prod_fam]
                 attr_val = product['attributes'][f2r]
-                if attr_val == pc.region:
+                if attr_val == pc.region:  # Old value (if attr_val == regions[pc.region]:)
                     sku = product['sku']
                     logger.debug('Found product SKU: {0} in region: {1}'.format(
                         sku, pc.region
